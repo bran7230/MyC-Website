@@ -1,54 +1,60 @@
 ﻿@page "/"
 @using BlazorApp1
-@using System.Text.Json;
+@using System.Text.Json
+@using System.Net.Http
+@inject GlobalVariables GlobalVars
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
 
 <h3>Welcome to @GlobalVars.Name!</h3>
 <p>Your ip is @GlobalVars.ip</p>
 <p>@GlobalVars.Value</p>
-<p>You have loaded my page: @GlobalVars.count times!</p>
 <p>Last time refreshed: @GlobalVars.last_time</p>
 
 <div>
-    <form>
-        <input type="text" @bind="url" placeholder="Enter URL: " />
-        <p>Debug : @url</p>
-        <button type ="button" onclick="UrlLook">Submit</button>
-    </form>
+    <div>
+        <input type="text" @bind="query" @bind:event="oninput" placeholder="Enter Query: " />
+        <button type="button" @onclick="UrlLook">Submit</button>
+    </div>
 </div>
+
 <div>
     <p>@outputMessage</p>
 </div>
 
 @code {
-    [Inject]
-    public GlobalVariables GlobalVars { get; set; } = default!;
     private string url { get; set; } = string.Empty;
+    private string query { get; set; } = string.Empty;
     private string outputMessage { get; set; } = string.Empty;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        GlobalVars.count++;
         GlobalVars.last_time = DateTime.Now.ToString();
-
-
-        var jsonData = new
-        {
-            times_loaded = GlobalVars.count,
-            ip_address = GlobalVars.ip,
-            last_loaded = GlobalVars.last_time
-        };
-        string jsonString = JsonSerializer.Serialize(jsonData);
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "data.json");
-        File.WriteAllText(filePath, jsonString);
     }
 
-
-    private void UrlLook()
+    private async Task UrlLook()
     {
-    
-        outputMessage = $"You entered: {url}";
-        
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure?"); // Confirm
+
+        if (confirmed)
+        {
+            outputMessage = "You entered: " + query;
+
+            var jsonData = new
+            {
+                ip_address = GlobalVars.ip,
+                last_loaded = GlobalVars.last_time,
+                query_saved = query
+            };
+            string jsonString = JsonSerializer.Serialize(jsonData);
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "data.json");
+            using (var stream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
+            using (var writer = new StreamWriter(stream))
+            {
+                writer.Write(jsonString);
+            }
+        }
         StateHasChanged();
     }
 }
