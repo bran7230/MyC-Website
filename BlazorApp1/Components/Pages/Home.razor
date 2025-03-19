@@ -1,14 +1,10 @@
 ﻿@page "/"
-@using BlazorApp1
-@using System.Text.Json
-@using System.Net.Http
 @inject GlobalVariables GlobalVars
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
 <h3>Welcome to @GlobalVars.Name!</h3>
 <p>Your ip is @GlobalVars.ip</p>
-<p>@GlobalVars.Value</p>
 <p>Last time refreshed: @GlobalVars.last_time</p>
 
 <div>
@@ -40,21 +36,30 @@
         if (confirmed)
         {
             outputMessage = "You entered: " + query;
-
+            Search();
             var jsonData = new
             {
                 ip_address = GlobalVars.ip,
                 last_loaded = GlobalVars.last_time,
-                query_saved = query
+                query_saved = query,
+                url_saved = url
             };
             string jsonString = JsonSerializer.Serialize(jsonData);
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "data.json");
             using (var stream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
             using (var writer = new StreamWriter(stream))
             {
+                
                 writer.Write(jsonString);
+                
             }
         }
         StateHasChanged();
+    }
+
+    private void Search()
+    {
+        url = "https://www.google.com/search?q="+ query;
+        JSRuntime.InvokeVoidAsync("open", url, "_blank");
     }
 }

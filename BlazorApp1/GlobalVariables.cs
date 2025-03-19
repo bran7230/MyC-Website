@@ -19,7 +19,7 @@ namespace BlazorApp1
 
         public GlobalVariables()
         {
-            Name = "GlobalVariable";
+            Name = "Json Webscrape";
             ip = GetIp();
             url = String.Empty;
             query = String.Empty; 
@@ -38,8 +38,8 @@ namespace BlazorApp1
                 }
                 else
                 {
-                    
-                    jsonstring = JsonSerializer.Serialize(new { times_loaded = count, ip_address = ip, last_loaded = last_time, query_saved = query });
+
+                    jsonstring = JsonSerializer.Serialize(new {  ip_address = ip, last_loaded = last_time, query_saved = query, url_saved = url });
                     File.WriteAllText(filePath, jsonstring);
                 }
             }
