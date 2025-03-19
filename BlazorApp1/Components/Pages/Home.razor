@@ -3,55 +3,115 @@
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
-<h3>Welcome to @GlobalVars.Name!</h3>
-<p>Your ip is @GlobalVars.ip</p>
-<p>Last time refreshed: @GlobalVars.last_time</p>
+<div class="main-content">
+    <h3>Welcome to @GlobalVars.Name!</h3>
+    <p>Your ip is @GlobalVars.ip</p>
+    <p>Last time refreshed: @GlobalVars.last_time</p>
 
-<div>
+    <!-- Query Section -->
+    <div class="form-group">
+        <label for="query">Enter Query:</label>
+        <input id="query" type="text" @bind="query" @bind:event="oninput" placeholder="Enter Query..." />
+    </div>
+
     <div>
-        <input type="text" @bind="query" @bind:event="oninput" placeholder="Enter Query: " />
-        <button type="button" @onclick="UrlLook">Submit</button>
+        <p>@outputMessage</p>
+    </div>
+
+    <!-- URL Section -->
+    <div class="form-group">
+        <label for="url">Or enter a URL instead:</label>
+        <input id="url" type="url" @bind="url" @bind:event="oninput" placeholder="Enter URL..." />
+    </div>
+
+    <button type="button" class="submit-button" @onclick="UrlLook">
+        Submit
+    </button>
+</div>
+
+<div class="json-container">
+    <h3>JSON Data Viewer</h3>
+    <pre id="json-display">{ "message": "No JSON data loaded yet." }</pre>
+
+    <h3>Edit JSON</h3>
+    <textarea id="json-editor" class="json-editor" placeholder="Enter JSON here..."></textarea>
+
+    <div class="json-buttons">
+        <button onclick="loadJSON()">Load</button>
+        <button onclick="saveJSON()">Save</button>
+        <button onclick="deleteJSON()">Delete</button>
+        <button onclick="createNewJSON()">Create New</button>
     </div>
 </div>
 
-<div>
-    <p>@outputMessage</p>
-</div>
+<script>
+    var jsonDisplay = document.getElementsById("json-editor");
+
+    function loadJSON() { 
+        jsonDisplay.textContent = "Test";
+    }
+</script>
+
+
 
 @code {
-    private string url { get; set; } = string.Empty;
+    //" https://www.w3schools.com/cs/index.php"
+    private string? url { get; set; } 
     private string query { get; set; } = string.Empty;
     private string outputMessage { get; set; } = string.Empty;
+    private string title { get; set; } = string.Empty;
+    private string divContent { get; set; } = string.Empty;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
         GlobalVars.last_time = DateTime.Now.ToString();
+
     }
 
     private async Task UrlLook()
     {
         bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure?"); // Confirm
 
+        var ip_address = GlobalVars.ip;
+        var last_loaded = GlobalVars.last_time;
+        var query_saved = query;
+        var url_saved = url;
+
         if (confirmed)
         {
             outputMessage = "You entered: " + query;
             Search();
-            var jsonData = new
+            var jsondata = new
             {
-                ip_address = GlobalVars.ip,
-                last_loaded = GlobalVars.last_time,
-                query_saved = query,
-                url_saved = url
-            };
-            string jsonString = JsonSerializer.Serialize(jsonData);
+                General_Data = new[] {
+                    "IP: "+ip_address,
+                    "Last Loaded: "+last_loaded
+                },
+
+                Web_Data = new[] {
+                    "Url: "+url,
+                    "Query: "+query,
+                    "Title: "+title,
+                    "All div tags: " + divContent,
+                    "Time of scrape: "+DateTime.Now.ToString(),
+                    "Amount of divs: "+divContent.Count(x => x == '<'),
+                    "Amount of p tags: "+divContent.Count(x => x == 'p')
+
+                }
+
+            }; 
+
+            string jsonString = JsonConvert.SerializeObject(jsondata, Formatting.Indented);
+            //clearing all old text
+            File.WriteAllText("data.json", jsonString);
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "data.json");
             using (var stream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
             using (var writer = new StreamWriter(stream))
             {
-                
+
                 writer.Write(jsonString);
-                
+
             }
         }
         StateHasChanged();
@@ -59,7 +119,48 @@
 
     private void Search()
     {
-        url = "https://www.google.com/search?q="+ query;
-        JSRuntime.InvokeVoidAsync("open", url, "_blank");
+
+        var web = new HtmlWeb();
+        try{
+            var doc = web.Load(url); 
+            title = doc.DocumentNode.SelectSingleNode("//title").InnerText;
+            var divs = doc.DocumentNode.SelectNodes("//div");
+            divContent = string.Join("\n", divs.Select(p => p.InnerText));
+
+        }
+        catch (Exception e)
+        {
+
+           
+        }
+
+        if (query == "")
+        {
+            query = "No query";
+        }
+
+        if (url == "")
+        {
+            url = "No url";
+        }
+
+        if(title == "")
+        {
+            title = "No title";
+        }
+
+        if(divContent == "")
+        {
+            divContent = "No div content";
+
+        }
+
+       
+    }
+    private void loadJSON()
+    {
+        string jsonCurrent = File.ReadAllText("data.json");
+        
     }
 }
+

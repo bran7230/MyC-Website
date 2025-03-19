@@ -1,1 +1,15 @@
-{"ip_address":"192.168.0.74","last_loaded":"2025-03-17 10:58:37 PM","query_saved":"x","url_saved":"https://www.google.com/search?q=x"}
+{
+  "General_Data": [
+    "IP: 192.168.0.74",
+    "Last Loaded: 2025-03-18 11:53:30 PM"
+  ],
+  "Web_Data": [
+    "Url: ",
+    "Query: No query",
+    "Title: No title",
+    "All div tags: No div content",
+    "Time of scrape: 2025-03-18 11:54:00 PM",
+    "Amount of divs: 0",
+    "Amount of p tags: 0"
+  ]
+}

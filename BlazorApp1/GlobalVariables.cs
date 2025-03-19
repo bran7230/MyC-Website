@@ -24,29 +24,7 @@ namespace BlazorApp1
             url = String.Empty;
             query = String.Empty; 
 
-            try
-            {
-                // Create an absolute file path in the current directory.
-                string filePath = Path.Combine(Directory.GetCurrentDirectory(), "data.json");
-
-                if (File.Exists(filePath))
-                {
-                    var jsonData = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(File.ReadAllText(filePath));
-                   
-                    // Always update the IP instead of using the stored value
-                    ip = GetIp();
-                }
-                else
-                {
-
-                    jsonstring = JsonSerializer.Serialize(new {  ip_address = ip, last_loaded = last_time, query_saved = query, url_saved = url });
-                    File.WriteAllText(filePath, jsonstring);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error saving to data.json: {ex.Message}");
-            }
+            
         }
 
         public static string GetIp()
