@@ -31,36 +31,38 @@
 
 <div class="json-container">
     <h3>JSON Data Viewer</h3>
-    <pre id="json-display">{ "message": "No JSON data loaded yet." }</pre>
+
+    <pre>@displayedJson</pre>
 
     <h3>Edit JSON</h3>
-    <textarea id="json-editor" class="json-editor" placeholder="Enter JSON here..."></textarea>
+
+    <textarea @bind="jsonContent" class="json-editor" rows="10"></textarea>
 
     <div class="json-buttons">
-        <button onclick="loadJSON()">Load</button>
-        <button onclick="saveJSON()">Save</button>
-        <button onclick="deleteJSON()">Delete</button>
-        <button onclick="createNewJSON()">Create New</button>
+        <button @onclick="LoadJson">Load</button>
+        <button @onclick="SaveJson">Save</button>
+        <button @onclick="DeleteJson">Delete</button>
+        <button @onclick="CreateNewJson">Create New</button>
     </div>
+
 </div>
 
-<script>
-    var jsonDisplay = document.getElementsById("json-editor");
 
-    function loadJSON() { 
-        jsonDisplay.textContent = "Test";
-    }
-</script>
 
 
 
 @code {
+
     //" https://www.w3schools.com/cs/index.php"
+
     private string? url { get; set; } 
     private string query { get; set; } = string.Empty;
     private string outputMessage { get; set; } = string.Empty;
     private string title { get; set; } = string.Empty;
     private string divContent { get; set; } = string.Empty;
+    private string jsonContent { get; set; } = string.Empty;
+    private string displayedJson { get; set; } = string.Empty;
+    
 
     protected override void OnInitialized()
     {
@@ -117,6 +119,10 @@
         StateHasChanged();
     }
 
+}
+
+@code{
+    private string filePath { get; set; } = Path.Combine(Directory.GetCurrentDirectory(), "data.json");
     private void Search()
     {
 
@@ -157,10 +163,38 @@
 
        
     }
-    private void loadJSON()
+
+    private async Task LoadJson()
     {
-        string jsonCurrent = File.ReadAllText("data.json");
-        
+        if (File.Exists(filePath))
+        {
+            jsonContent = await File.ReadAllTextAsync(filePath);
+            displayedJson = jsonContent;
+        }
+        else
+        {
+            jsonContent = "{ \"error\": \"No file found.\" }";
+        }
     }
+
+    private async Task SaveJson()
+    {
+        await File.WriteAllTextAsync(filePath, jsonContent);
+    }
+
+    private Task DeleteJson()
+    {
+        jsonContent = "{}";
+        displayedJson = "{}";
+        return Task.CompletedTask;
+    }
+
+    private Task CreateNewJson()
+    {
+        jsonContent = "{\n    \"key\": \"value\"\n}";
+        displayedJson = jsonContent;
+        return Task.CompletedTask;
+    }
+    
 }
 
