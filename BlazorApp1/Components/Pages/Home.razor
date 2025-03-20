@@ -3,6 +3,7 @@
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
+
 <div class="main-content">
     <h3>Welcome to @GlobalVars.Name!</h3>
     <p>Your ip is @GlobalVars.ip</p>
@@ -29,25 +30,24 @@
     <div class="buttonParent" style="@(isDisabled ? "display: none;" : "")">
         <button type="button" class="submit-button" @onclick="UrlLook">
             Submit
-        </button>     
+        </button>    
     </div>
     @if (isLoading)
     {
-
         <div class="spinner"></div>
-        isDisabled = true;
     }
 
-    @if(isDisabled)
+    @if (isDisabled)
     {
-        if(!disableNew){
+
+        if (disableNew)
+        {
             <div class="complete">Completed transfer. @GlobalVars.last_time</div>
             <div class="makeanother">
-                <button type="button" class="another" @onclick = "reset">Test</button>
+                <button type="button" @onclick="reset">Test</button>
             </div>
         }
     }
-
 </div>
 
 <div class="parent">
@@ -92,7 +92,7 @@
     private string currentJson { get; set; } = string.Empty;
     private bool isLoading { get; set; } = false;
     private bool isDisabled { get; set; } = false;
-    private bool disableNew { get; set; } = false;
+    private bool disableNew { get; set; } = true;
     private bool removeButton { get; set; } = false;
     private bool returnedData { get; set; } = false;
 
@@ -149,9 +149,7 @@
                 writer.Write(jsonString);
 
             }
-
             await Delaytest();
-
         }
         StateHasChanged();
     }
@@ -163,29 +161,18 @@
     private async Task Delaytest()
     {
         isLoading = true;
-        disableNew = true;
+        isDisabled = true;
         await Task.Delay(2000);
 
-         test();
-
-
-
     }
-
-    private void test()
-    {
-        
-        disableNew = false;
-    }
-
 
     private async Task reset()
     {
-        removeButton = true; 
+        removeButton = true;
         await Task.Delay(3000);
         isDisabled = false;
         disableNew = true;
-        
+        isLoading = false;
     }
 
     private string filePath { get; set; } = Path.Combine(Directory.GetCurrentDirectory(), "data.json");

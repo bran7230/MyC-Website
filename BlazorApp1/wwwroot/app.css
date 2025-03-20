@@ -110,6 +110,18 @@ button {
     padding:20px;
     font-size:2rem;
 }
+.makeanother{
+  display:flex;
+  justify-content:center;
+  width:50%;
+  color:red;
+}
+
+.makeanother button:hover{
+    transform:translateY(-3px);
+}
+
+
 
 
 .parent{   
