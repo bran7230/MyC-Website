@@ -37,7 +37,8 @@
         <div class="spinner"></div>
     }
 
-    @if (isDisabled)
+    
+    @if (returnedData)
     {
 
         if (disableNew)
@@ -46,7 +47,7 @@
             <div class="makeanother">
                 <button type="button" @onclick="reset">Test</button>
             </div>
-        }
+        } 
     }
 </div>
 
