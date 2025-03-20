@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\bootstrap\app.css" />
+    <None Include="wwwroot\app.css" />
   </ItemGroup>
 
   <ItemGroup>

@@ -29,22 +29,22 @@
     </button>
 </div>
 
-<div class="json-container">
-    <h3>JSON Data Viewer</h3>
+<div class="parent">
+    <div class="json-container">
+        <h3>JSON Data Viewer</h3>
+        <pre>@currentJson</pre>
+        <pre>@displayedJson</pre>
 
-    <pre>@displayedJson</pre>
 
-    <h3>Edit JSON</h3>
 
-    <textarea @bind="jsonContent" class="json-editor" rows="10"></textarea>
-
-    <div class="json-buttons">
-        <button @onclick="LoadJson">Load</button>
-        <button @onclick="SaveJson">Save</button>
-        <button @onclick="DeleteJson">Delete</button>
-        <button @onclick="CreateNewJson">Create New</button>
+        <div class="json-buttons">
+            <button @onclick="LoadJson">Load</button>
+            <button @onclick="SaveJson">Save</button>
+            <button @onclick="DeleteJson">Delete</button>
+            <button @onclick="CreateNewJson">Create New</button>
+        </div>
+        <textarea @bind="jsonContent" class="json-editor" rows="10"></textarea>
     </div>
-
 </div>
 
 
@@ -52,6 +52,12 @@
 
 
 @code {
+
+
+
+
+
+
 
     //" https://www.w3schools.com/cs/index.php"
 
@@ -62,7 +68,9 @@
     private string divContent { get; set; } = string.Empty;
     private string jsonContent { get; set; } = string.Empty;
     private string displayedJson { get; set; } = string.Empty;
-    
+
+    private string currentJson { get; set; } = string.Empty;
+
 
     protected override void OnInitialized()
     {
@@ -122,7 +130,11 @@
 }
 
 @code{
+
+
+
     private string filePath { get; set; } = Path.Combine(Directory.GetCurrentDirectory(), "data.json");
+   
     private void Search()
     {
 
@@ -137,7 +149,7 @@
         catch (Exception e)
         {
 
-           
+
         }
 
         if (query == "")
@@ -161,7 +173,7 @@
 
         }
 
-       
+
     }
 
     private async Task LoadJson()
@@ -170,6 +182,8 @@
         {
             jsonContent = await File.ReadAllTextAsync(filePath);
             displayedJson = jsonContent;
+
+           
         }
         else
         {
