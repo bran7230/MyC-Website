@@ -8,6 +8,8 @@
     <p>Your ip is @GlobalVars.ip</p>
     <p>Last time refreshed: @GlobalVars.last_time</p>
 
+
+
     <!-- Query Section -->
     <div class="form-group">
         <label for="query">Enter Query:</label>
@@ -24,9 +26,28 @@
         <input id="url" type="url" @bind="url" @bind:event="oninput" placeholder="Enter URL..." />
     </div>
 
-    <button type="button" class="submit-button" @onclick="UrlLook">
-        Submit
-    </button>
+    <div class="buttonParent" style="@(isDisabled ? "display: none;" : "")">
+        <button type="button" class="submit-button" @onclick="UrlLook">
+            Submit
+        </button>     
+    </div>
+    @if (isLoading)
+    {
+
+        <div class="spinner"></div>
+        isDisabled = true;
+    }
+
+    @if(isDisabled)
+    {
+        if(!disableNew){
+            <div class="complete">Completed transfer. @GlobalVars.last_time</div>
+            <div class="makeanother">
+                <button type="button" class="another" @onclick = "reset">Test</button>
+            </div>
+        }
+    }
+
 </div>
 
 <div class="parent">
@@ -68,8 +89,12 @@
     private string divContent { get; set; } = string.Empty;
     private string jsonContent { get; set; } = string.Empty;
     private string displayedJson { get; set; } = string.Empty;
-
     private string currentJson { get; set; } = string.Empty;
+    private bool isLoading { get; set; } = false;
+    private bool isDisabled { get; set; } = false;
+    private bool disableNew { get; set; } = false;
+    private bool removeButton { get; set; } = false;
+    private bool returnedData { get; set; } = false;
 
 
     protected override void OnInitialized()
@@ -83,6 +108,7 @@
     {
         bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure?"); // Confirm
 
+
         var ip_address = GlobalVars.ip;
         var last_loaded = GlobalVars.last_time;
         var query_saved = query;
@@ -90,6 +116,7 @@
 
         if (confirmed)
         {
+
             outputMessage = "You entered: " + query;
             Search();
             var jsondata = new
@@ -122,6 +149,9 @@
                 writer.Write(jsonString);
 
             }
+
+            await Delaytest();
+
         }
         StateHasChanged();
     }
@@ -130,10 +160,36 @@
 
 @code{
 
+    private async Task Delaytest()
+    {
+        isLoading = true;
+        disableNew = true;
+        await Task.Delay(2000);
 
+         test();
+
+
+
+    }
+
+    private void test()
+    {
+        
+        disableNew = false;
+    }
+
+
+    private async Task reset()
+    {
+        removeButton = true; 
+        await Task.Delay(3000);
+        isDisabled = false;
+        disableNew = true;
+        
+    }
 
     private string filePath { get; set; } = Path.Combine(Directory.GetCurrentDirectory(), "data.json");
-   
+
     private void Search()
     {
 
@@ -182,7 +238,7 @@
             jsonContent = await File.ReadAllTextAsync(filePath);
             displayedJson = jsonContent;
 
-           
+
         }
         else
         {
@@ -208,6 +264,6 @@
         displayedJson = jsonContent;
         return Task.CompletedTask;
     }
-    
+
 }
 
