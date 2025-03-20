@@ -35,18 +35,18 @@
     @if (isLoading)
     {
         <div class="spinner"></div>
+
     }
 
-    
+
     @if (returnedData)
     {
 
         if (disableNew)
         {
+
             <div class="complete">Completed transfer. @GlobalVars.last_time</div>
-            <div class="makeanother">
-                <button type="button" @onclick="reset">Test</button>
-            </div>
+            <div class="reset"><button type="button" class="reset" @onclick="reset">Make another Json</button></div>
         } 
     }
 </div>
@@ -150,7 +150,8 @@
                 writer.Write(jsonString);
 
             }
-            await Delaytest();
+            await Loading(); 
+            sqlTransfer();
         }
         StateHasChanged();
     }
@@ -159,21 +160,44 @@
 
 @code{
 
-    private async Task Delaytest()
+    private async Task Loading()
     {
-        isLoading = true;
+        await Task.Delay(1000);
         isDisabled = true;
-        await Task.Delay(2000);
-
+        isLoading = true;
     }
 
-    private async Task reset()
+   
+
+    private void sqlTransfer()
+    {
+        string connectionString = "Server=localHost;Database=designation;Trusted_Connection=True;";
+
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+
+            // Make sure you specify a table name
+            string query = "SELECT * FROM test1";
+
+            using (SqlCommand command = new SqlCommand(query, connection))
+            using (SqlDataReader reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    // Process data here
+                    Console.WriteLine(reader[0]); // Example: print first column
+                }
+            }
+        }
+    }
+
+    private void reset()
     {
         removeButton = true;
-        await Task.Delay(3000);
         isDisabled = false;
-        disableNew = true;
         isLoading = false;
+        disableNew = false;
     }
 
     private string filePath { get; set; } = Path.Combine(Directory.GetCurrentDirectory(), "data.json");
