@@ -1,14 +1,13 @@
 {
   "General_Data": [
-    "IP: 192.168.0.74",
-    "Last Loaded: 2025-03-19 10:41:53 PM"
+    "Last Loaded: 2025-03-19 10:43:40 PM"
   ],
   "Web_Data": [
     "Url: ",
-    "Query: wx",
+    "Query: Test",
     "Title: No title",
     "All div tags: No div content",
-    "Time of scrape: 2025-03-19 10:42:21 PM",
+    "Time of scrape: 2025-03-19 10:43:45 PM",
     "Amount of divs: 0",
     "Amount of p tags: 0"
   ]
