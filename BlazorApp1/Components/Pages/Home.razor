@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using System.Text
 @inject GlobalVariables GlobalVars
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
@@ -141,7 +142,7 @@
 
             }
 
-            sqlTransfer();
+            SqlTransfer();
 
 
         }
@@ -161,39 +162,80 @@
 
 
 
-    private void sqlTransfer()
+    private void SqlTransfer()
     {
+        var jsondata = new
+        {
+            General_Data = new[] {
+                    "Last Loaded: "+GlobalVars.last_time
+                },
+
+            Web_Data = new[] {
+                    "Url: "+url,
+                    "Query: "+query,
+                    "Title: "+title,
+                    "All div tags: " + divContent,
+                    "Time of scrape: "+DateTime.Now.ToString(),
+                    "Amount of divs: "+divContent.Count(x => x == '<'),
+                    "Amount of p tags: "+divContent.Count(x => x == 'p')
+
+                }
+
+        };
         try
         {
-            string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Json;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
-
+            string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Json;Integrated Security=True";
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
-                // Make sure you specify a table name
-                string query = "Select * from [dbo].[Table]";
+                string query = @"
+                                insert into dbo.ScrapedData (Url, TimeScraped, JsonData, Id)
+                                values(@url, @last_loaded, @jsondata, @id)
+                                SELECT [Url], [TimeScraped], [JsonData] FROM dbo.ScrapedData ORDER BY [TimeScraped] DESC";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
-                using (SqlDataReader reader = command.ExecuteReader())
                 {
-                    while (reader.Read())
+                    command.Parameters.AddWithValue("@url", url); // Replace `yourUrlValue` with the actual value
+                    command.Parameters.AddWithValue("@last_loaded", GlobalVars.last_time); // Replace `yourLastLoadedValue` with the actual value
+                    command.Parameters.AddWithValue("@jsondata", jsondata); // Replace `yourJsonDataValue` with the actual value
+                    command.Parameters.AddWithValue("@id", 1); // Set the Id value as needed
+
+                    using (SqlDataReader reader = command.ExecuteReader())
                     {
-                        Loading();
+                        StringBuilder output = new StringBuilder();
 
-                        outputMessage = $"Id: {reader["Title"]}, Name: {reader["Url"]}, Json: {reader["Json"]}";
+                        while (reader.Read())
+                        {
+                            // Example loading method
+                            Console.WriteLine("Processing...");
+
+                            string time = reader["TimeScraped"]?.ToString() ?? "No Title";
+                            string json = reader["JsonData"]?.ToString() ?? "No JSON";
+                            string urldata = reader["Url"]?.ToString() ?? "No Url";
+
+                            output.AppendLine($"Time scraped: {time}");
+                            output.AppendLine($"Json: {json}");
+                            output.AppendLine($"Url: {urldata}");
+                        }
 
 
+                        outputMessage = output.ToString();
                     }
-                    
                 }
             }
             reset();
         }
-        catch (Microsoft.Data.SqlClient.SqlException e)
+        catch (SqlException e)
         {
-            outputMessage = "error" + e;
+            outputMessage = $"SQL Error: {e.Message}";
+            Console.WriteLine($"Full error details: {e}");
+        }
+        catch (Exception ex)
+        {
+            outputMessage = $"General Error: {ex.Message}";
+            Console.WriteLine($"Error: {ex}");
         }
     }
 
