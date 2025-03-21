@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Components\Class.css" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="wwwroot\app.css" />
   </ItemGroup>
 

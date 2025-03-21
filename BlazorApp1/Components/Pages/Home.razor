@@ -6,10 +6,9 @@
 
 <div class="main-content">
     <h3>Welcome to @GlobalVars.Name!</h3>
-    <p>Your ip is @GlobalVars.ip</p>
     <p>Last time refreshed: @GlobalVars.last_time</p>
 
-
+    <!--Whatever-->
 
     <!-- Query Section -->
     <div class="form-group">
@@ -35,20 +34,18 @@
     @if (isLoading)
     {
         <div class="spinner"></div>
-
     }
 
 
     @if (returnedData)
     {
-
         if (disableNew)
         {
-
             <div class="complete">Completed transfer. @GlobalVars.last_time</div>
             <div class="reset"><button type="button" class="reset" @onclick="reset">Make another Json</button></div>
         } 
     }
+
 </div>
 
 <div class="parent">
@@ -71,15 +68,7 @@
 
 
 
-
-
 @code {
-
-
-
-
-
-
 
     //" https://www.w3schools.com/cs/index.php"
 
@@ -91,9 +80,10 @@
     private string jsonContent { get; set; } = string.Empty;
     private string displayedJson { get; set; } = string.Empty;
     private string currentJson { get; set; } = string.Empty;
+
     private bool isLoading { get; set; } = false;
     private bool isDisabled { get; set; } = false;
-    private bool disableNew { get; set; } = true;
+    private bool disableNew { get; set; } = false;
     private bool removeButton { get; set; } = false;
     private bool returnedData { get; set; } = false;
 
@@ -150,8 +140,10 @@
                 writer.Write(jsonString);
 
             }
-            await Loading(); 
+
             sqlTransfer();
+
+
         }
         StateHasChanged();
     }
@@ -160,35 +152,48 @@
 
 @code{
 
-    private async Task Loading()
+    private void Loading()
     {
-        await Task.Delay(1000);
+
         isDisabled = true;
         isLoading = true;
     }
 
-   
+
 
     private void sqlTransfer()
     {
-        string connectionString = "Server=localHost;Database=designation;Trusted_Connection=True;";
-
-        using (SqlConnection connection = new SqlConnection(connectionString))
+        try
         {
-            connection.Open();
+            string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Json;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
 
-            // Make sure you specify a table name
-            string query = "SELECT * FROM test1";
 
-            using (SqlCommand command = new SqlCommand(query, connection))
-            using (SqlDataReader reader = command.ExecuteReader())
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                while (reader.Read())
+                connection.Open();
+
+                // Make sure you specify a table name
+                string query = "Select * from [dbo].[Table]";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                using (SqlDataReader reader = command.ExecuteReader())
                 {
-                    // Process data here
-                    Console.WriteLine(reader[0]); // Example: print first column
+                    while (reader.Read())
+                    {
+                        Loading();
+
+                        outputMessage = $"Id: {reader["Title"]}, Name: {reader["Url"]}, Json: {reader["Json"]}";
+
+
+                    }
+                    
                 }
             }
+            reset();
+        }
+        catch (Microsoft.Data.SqlClient.SqlException e)
+        {
+            outputMessage = "error" + e;
         }
     }
 
@@ -210,7 +215,7 @@
             var doc = web.Load(url); 
             title = doc.DocumentNode.SelectSingleNode("//title").InnerText;
             var divs = doc.DocumentNode.SelectNodes("//div");
-            divContent = string.Join("\n", divs.Select(p => p.InnerText));
+            divContent = string.Join("\n",divs.Select(p => p.InnerText));
 
         }
         catch (Exception e)
@@ -249,8 +254,6 @@
         {
             jsonContent = await File.ReadAllTextAsync(filePath);
             displayedJson = jsonContent;
-
-
         }
         else
         {
@@ -265,8 +268,8 @@
 
     private Task DeleteJson()
     {
-        jsonContent = "{}";
-        displayedJson = "{}";
+        jsonContent = "{No Content}";
+        displayedJson = "{No Content}";
         return Task.CompletedTask;
     }
 
