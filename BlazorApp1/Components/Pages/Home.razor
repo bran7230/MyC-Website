@@ -58,7 +58,7 @@
 
 
         <div class="json-buttons">
-            <button @onclick="LoadJson">Load</button>
+            <button @onclick="LoadJson">Load scraped</button>
             <button @onclick="SaveJson">Save</button>
             <button @onclick="DeleteJson">Delete</button>
             <button @onclick="CreateNewJson">Create New</button>
@@ -99,8 +99,6 @@
     private async Task UrlLook()
     {
         bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure?"); // Confirm
-
-
         var ip_address = GlobalVars.ip;
         var last_loaded = GlobalVars.last_time;
         var query_saved = query;
@@ -142,8 +140,8 @@
 
             }
 
-            SqlTransfer();
 
+            Loading();
 
         }
         StateHasChanged();

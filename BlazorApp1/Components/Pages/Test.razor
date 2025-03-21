@@ -1,6 +1,56 @@
-﻿@page "/test"
-<h3>Test</h3>
+﻿@page "/Test"
+<div class="sun-container">
+    <div class="sun" style="@GetSunPositionStyle()"></div>
+</div>
+
+@if(DateTime.Now.Hour >18){
+    <style>
+     .sun{
+        background-color:grey;
+        border: 15px solid white;
+        }
+    </style>
+}
+
+else
+{
+    <style>
+        .sun{
+            background-color:orangered;
+            border: 15px solid rgb(210, 1, 3);
+        }
+    </style>
+}
+
+
+<style>
+    .sun-container {
+        position: relative;
+        width: 100%;
+        height: 200px; /* Adjust height as needed */
+    }
+
+    .sun {
+        display: block;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        padding: 40px;
+        animation: spin 2s linear infinite;
+    }
+
+
+</style>
 
 @code {
+    private string GetSunPositionStyle()
+    {
+        var currentHour = DateTime.Now.Hour;
 
+        // Ensure the position stays within 0-100% bounds
+        int leftPosition = Math.Clamp((currentHour * 100) / 24, 0, 100);
+        int topPosition = 50; // You can adjust this calculation if dynamic top positioning is needed
+
+        return $"position: absolute; left: {leftPosition}%; top: {topPosition}px;";
+    }
 }
